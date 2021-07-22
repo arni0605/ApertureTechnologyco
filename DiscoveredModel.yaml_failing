@@ -1,0 +1,288 @@
+domainInfo:
+    AdminUserName: '@@PROP:AdminUserName@@'
+    AdminPassword: '@@PROP:AdminPassword@@'
+topology:
+    Name: wls01_domain
+    DomainVersion: 10.3.6.0
+    ProductionModeEnabled: true
+    Cluster:
+        j2ee_cluster:
+        cedole_cluster:
+        questionari_cluster:
+            NumberOfServersInClusterAddress: 2
+    Server:
+        WLS_J2EE1:
+            ListenPort: 7003
+            Machine: wls01_machine_1
+            Cluster: j2ee_cluster
+            JTAMigratableTarget:
+                Cluster: j2ee_cluster
+                UserPreferredServer: WLS_J2EE1
+            SSL:
+                HostnameVerificationIgnored: true
+            ServerDiagnosticConfig:
+                DiagnosticContextEnabled: true
+        WLS1_ECEDOLE:
+            ListenPort: 7005
+            WeblogicPluginEnabled: true
+            Machine: wls01_machine_1
+            Cluster: cedole_cluster
+            JTAMigratableTarget:
+                Cluster: cedole_cluster
+                UserPreferredServer: WLS1_ECEDOLE
+            SSL:
+                HostnameVerificationIgnored: true
+        WLS1_questionari:
+            ListenPort: 7006
+            Machine: wls01_machine_1
+            Cluster: questionari_cluster
+            JTAMigratableTarget:
+                Cluster: questionari_cluster
+                UserPreferredServer: WLS1_questionari
+resources:
+    StartupClass:
+        JRF Startup Class:
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 110
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.jrf.wls.JRFStartup
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        JPS Startup Class:
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 115
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.security.jps.wls.JpsWlsStartupClass
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        'ODL-Startup':
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 145
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.core.ojdl.weblogic.ODLConfiguration
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        AWT Application Context Startup Class:
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 150
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.jrf.AppContextStartup
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        JMX Framework Startup Class:
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 150
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.as.jmx.framework.wls.spi.StartupListener
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        Web Services Startup Class:
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 150
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.j2ee.ws.server.WebServiceServerStartup
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        'JOC-Startup':
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 150
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.ias.cache.Startup
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        'DMS-Startup':
+            LoadBeforeAppActivation: true
+            DeploymentOrder: 150
+            LoadBeforeAppDeployments: true
+            ClassName: oracle.dms.wls.DMSStartup
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+    ShutdownClass:
+        'JOC-Shutdown':
+            DeploymentOrder: 150
+            ClassName: oracle.ias.cache.Shutdown
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+        DMSShutdown:
+            DeploymentOrder: 150
+            ClassName: oracle.dms.wls.DMSShutdown
+            Target: 'j2ee_cluster,cedole_cluster,questionari_cluster,AdminServer'
+    JDBCSystemResource:
+        OracleDSEced:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    MaxCapacity: 50
+                    MinCapacity: 0
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                    InitialCapacity: 0
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/OracleDSEced
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db1.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs1_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.OracleDSEced.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.OracleDSEced.user.Value@@'
+        DSseda:
+            Target: questionari_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                    InitialCapacity: 0
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/DSseda
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.DSseda.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.DSseda.user.Value@@'
+        DSmoraconto:
+            Target: questionari_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                    InitialCapacity: 0
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/Moraconto
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.DSmoraconto.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.DSmoraconto.user.Value@@'
+        DSRsweb:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                    InitialCapacity: 0
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/Rsweb
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.DSRsweb.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.DSRsweb.user.Value@@'
+        DSmorapmi2015:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                    InitialCapacity: 0
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/Morapmi2015
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db1.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs1_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.DSmorapmi2015.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.DSmorapmi2015.user.Value@@'
+        OracleDSOssfis:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/OracleDSOssfis
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db1.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs1_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.OracleDSOssfis.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.OracleDSOssfis.user.Value@@'
+        OracleDSCnt:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    MaxCapacity: 35
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/OracleDSCnt
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db1.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs1_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.OracleDSCnt.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.OracleDSCnt.user.Value@@'
+        OracleDSCntAsp:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCConnectionPoolParams:
+                    TestTableName: SQL SELECT 1 FROM DUAL
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/OracleDSCntAsp
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db1.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs1_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.OracleDSCntAsp.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.OracleDSCntAsp.user.Value@@'
+        OracleDSCntADR:
+            Target: cedole_cluster
+            JdbcResource:
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/OracleDSCntADR
+                JDBCDriverParams:
+                    URL: 'jdbc:oracle:thin:@//db.sub07170632250.ocivcn.oraclevcn.com:1521/dbcs_pdb1.sub07170632250.ocivcn.oraclevcn.com'
+                    PasswordEncrypted: '@@PROP:JDBC.OracleDSCntADR.PasswordEncrypted@@'
+                    DriverName: oracle.jdbc.OracleDriver
+                    Properties:
+                        user:
+                            Value: '@@PROP:JDBC.OracleDSCntADR.user.Value@@'
+appDeployments:
+    Application:
+           ords:
+            SourcePath: wlsdeploy/applications/ords.war
+            ModuleType: war
+            Target: j2ee_cluster
+            SecurityDDModel: CustomRoles
+        ecedole:
+            SourcePath: wlsdeploy/applications/ecedole.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        qseda:
+            SourcePath: wlsdeploy/applications/qseda.ear
+            ModuleType: ear
+            Target: questionari_cluster
+        qCorporateGiving:
+            SourcePath: wlsdeploy/applications/qCorporateGiving.ear
+            ModuleType: ear
+            Target: questionari_cluster
+        moraconto:
+            SourcePath: wlsdeploy/applications/moraconto.ear
+            ModuleType: ear
+            Target: questionari_cluster
+        PaginaAnnuncio:
+            SourcePath: wlsdeploy/applications/PaginaAnnuncio.ear
+            ModuleType: ear
+            Target: questionari_cluster
+        RassegnaWeb:
+            SourcePath: wlsdeploy/applications/RassegnaWeb.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        AdminMorapmi2019:
+            SourcePath: wlsdeploy/applications/AdminMorapmi2019.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        morapmi2019_esterno:
+            SourcePath: wlsdeploy/applications/morapmi2019_esterno.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        ossfis_esterno:
+            SourcePath: wlsdeploy/applications/ossfis_esterno.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        contributi:
+            SourcePath: wlsdeploy/applications/contributi.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        contrasp:
+            SourcePath: wlsdeploy/applications/contrasp.ear
+            ModuleType: ear
+            Target: cedole_cluster
+        ConciliatoreBancarioFinanziario:
+            SourcePath: wlsdeploy/applications/ConciliatoreBancarioFinanziario.ear
+            ModuleType: ear
+            Target: cedole_cluster
